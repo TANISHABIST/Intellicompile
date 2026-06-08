@@ -1,0 +1,24 @@
+# Add semantic analysis sources
+SOURCES = token.c ast.c syntax_error_detector.c symbol_table.c semantic_analyzer.c $(LEX_OUTPUT) $(BISON_OUTPUT)
+HEADERS = token.h ast.h syntax_error_detector.h symbol_table.h semantic_analyzer.h
+
+# Add test targets
+test-semantic-valid: $(TARGET)
+	./$(TARGET) test_semantic_valid.c
+
+test-semantic-invalid: $(TARGET)
+	./$(TARGET) test_semantic_invalid.c
+
+# Update help
+help:
+	@echo "Available targets:"
+	@echo "  all                - Build the parser"
+	@echo "  test-valid         - Test with valid syntax"
+	@echo "  test-invalid       - Test with invalid syntax"
+	@echo "  test-semantic-valid   - Test with valid semantics"
+	@echo "  test-semantic-invalid - Test with invalid semantics"
+	@echo "  clean              - Remove build files"
+	@echo "  install-deps       - Install dependencies"
+	@echo "  help               - Show this help"
+
+.PHONY: all test-valid test-invalid test-semantic-valid test-semantic-invalid clean install-deps help

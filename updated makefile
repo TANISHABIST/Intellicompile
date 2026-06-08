@@ -1,0 +1,67 @@
+# Makefile for IntelliCompile Parser
+
+CC = gcc
+CFLAGS = -Wall -Wextra -std=c99 -g
+FLEX = flex
+BISON = bison
+PARSER = parser
+TARGET = intelli_parser
+
+# Source files
+LEX_SOURCE = lexer.l
+LEX_OUTPUT = lex.yy.c
+BISON_SOURCE = parser.y
+BISON_OUTPUT = parser.tab.c
+BISON_HEADER = parser.tab.h
+
+SOURCES = token.c ast.c syntax_error_detector.c $(LEX_OUTPUT) $(BISON_OUTPUT)
+OBJECTS = $(SOURCES:.c=.o)
+HEADERS = token.h ast.h syntax_error_detector.h
+
+# Default target
+all: $(TARGET)
+
+# Build the parser
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ -lfl
+
+# Generate lexer from .l file
+$(LEX_OUTPUT): $(LEX_SOURCE) $(BISON_HEADER)
+	$(FLEX) -o $@ $<
+
+# Generate parser from .y file
+$(BISON_OUTPUT): $(BISON_SOURCE)
+	$(BISON) -d -v -o $@ $<
+
+# Compile object files
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Test with valid program
+test-valid: $(TARGET)
+	./$(TARGET) test_valid.c
+
+# Test with invalid program (missing semicolons)
+test-invalid: $(TARGET)
+	./$(TARGET) test_invalid.c
+
+# Clean build files
+clean:
+	rm -f $(OBJECTS) $(LEX_OUTPUT) $(BISON_OUTPUT) $(BISON_HEADER) $(TARGET) parser.output
+
+# Install dependencies (Ubuntu/Debian)
+install-deps:
+	sudo apt-get update
+	sudo apt-get install flex bison build-essential
+
+# Help
+help:
+	@echo "Available targets:"
+	@echo "  all          - Build the parser"
+	@echo "  test-valid   - Test with valid program"
+	@echo "  test-invalid - Test with invalid program"
+	@echo "  clean        - Remove build files"
+	@echo "  install-deps - Install dependencies"
+	@echo "  help         - Show this help"
+
+.PHONY: all test-valid test-invalid clean install-deps help

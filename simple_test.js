@@ -1,0 +1,41 @@
+const axios = require('axios');
+
+async function simpleTest() {
+  const testCode = `int main() {
+    int x = 10;
+    x = x * 2;
+    return 0;
+}`;
+
+  console.log('Testing with code:', testCode);
+  
+  try {
+    const response = await axios.post('http://localhost:5000/api/compile', {
+      code: testCode
+    });
+    
+    console.log('Full response:', JSON.stringify(response.data, null, 2));
+    
+    // Check specific fields
+    console.log('\n--- Analysis ---');
+    console.log('Errors:', response.data.errors.length);
+    response.data.errors.forEach((err, i) => {
+      console.log(`  ${i+1}. ${err.message} (${err.type})`);
+    });
+    
+    console.log('Optimizations:', response.data.optimizations.length);
+    response.data.optimizations.forEach((opt, i) => {
+      console.log(`  ${i+1}. ${opt.title} - ${opt.description}`);
+    });
+    
+    console.log('Quality:', response.data.quality);
+    
+  } catch (error) {
+    console.error('Error:', error.message);
+    if (error.response) {
+      console.error('Response data:', error.response.data);
+    }
+  }
+}
+
+simpleTest();
